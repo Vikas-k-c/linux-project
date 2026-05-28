@@ -1,23 +1,41 @@
-# Cross-Platform Linux System Call Monitoring Dashboard
+# Linux Project - System Call Monitoring Dashboard
 
-A complete frontend and backend dashboard around the existing Project4 Linux
-kernel module. The kernel module stays unchanged. The Node.js backend reads
-kernel logs on Linux and automatically switches to a mock syscall generator on
-Windows so the demo works everywhere.
+This repository contains a Linux system call monitoring dashboard plus the
+original Project 4 kernel module files.
+
+All Project 4 files are inside the `kernel_module/` folder:
+
+```text
+kernel_module/
+|-- barrier.patch
+|-- Makefile
+|-- README.md
+`-- user.c
+```
+
+The `backend/` and `frontend/` folders contain the dashboard application. The
+kernel module files are kept separate and unchanged inside `kernel_module/`.
 
 ## Folder Structure
 
 ```text
-project-root/
-├── kernel_module/        # Existing Project4 kernel module goes here unchanged
-├── backend/              # Express + Socket.IO backend
-├── frontend/             # Vite + React + Tailwind dashboard
-└── README.md
+linux-project/
+|-- kernel_module/   # All Project 4 files
+|-- backend/         # Express + Socket.IO backend
+|-- frontend/        # Vite + React dashboard
+`-- README.md
 ```
 
-## Run The Project
+## Run The Dashboard On Linux
 
-Backend:
+Install Node.js and npm first:
+
+```bash
+sudo apt update
+sudo apt install nodejs npm
+```
+
+Start the backend:
 
 ```bash
 cd backend
@@ -26,7 +44,7 @@ cp .env.example .env
 npm run dev
 ```
 
-Frontend:
+Open a second terminal and start the frontend:
 
 ```bash
 cd frontend
@@ -35,144 +53,138 @@ cp .env.example .env
 npm run dev
 ```
 
-Open `http://localhost:5173`.
+Open the app in your browser:
 
-## Linux Kernel Module Setup
-
-Place the existing Project4 module files in `kernel_module/`, then build and
-load them exactly as your original project requires. This dashboard does not
-change the kernel module logic.
-
-Typical Linux flow:
-
-```bash
-cd kernel_module
-make
-sudo insmod project4.ko
-dmesg --follow
+```text
+http://localhost:5173
 ```
 
-Then run the backend. On Linux, it uses:
+On Linux, the backend reads kernel logs using:
 
 ```bash
 dmesg --follow --human
 ```
 
-If your system restricts `dmesg`, run the backend with suitable permissions or
-disable `kernel.dmesg_restrict` for the demo environment.
-
-## Windows Demo Mode
-
-On Windows, the backend automatically starts in mock mode and generates syscall
-logs every few seconds. This lets the full dashboard run for college
-presentations without Linux kernel support.
-
-To force mock mode on Linux:
+If Linux blocks access to `dmesg`, run the backend with `sudo` for testing:
 
 ```bash
+sudo npm run dev
+```
+
+Or temporarily allow kernel log access in a demo environment:
+
+```bash
+sudo sysctl kernel.dmesg_restrict=0
+```
+
+## Run In Demo Mode
+
+If you only want to show the dashboard without real kernel logs, force mock mode:
+
+```bash
+cd backend
 FORCE_MOCK=true npm run dev
 ```
 
-On PowerShell:
+Then run the frontend normally from the `frontend/` folder.
 
-```powershell
-$env:FORCE_MOCK="true"; npm run dev
+## Project 4 Kernel Module Files
+
+The original Project 4 instructions are in:
+
+```text
+kernel_module/README.md
 ```
 
-## Backend APIs
+That folder contains the patch and user test program for the custom barrier
+system calls:
 
-- `GET /api/logs` returns parsed syscall log entries.
-- `GET /api/stats` returns dashboard statistics.
-- `GET /health` returns runtime and monitor status.
+- `barrier.patch` applies the syscall changes to the Linux kernel source.
+- `user.c` is the user-space test program.
+- `Makefile` builds the user test program for the original Project 4 target.
 
-Log shape:
+## Build And Test Project 4 On Linux
 
-```json
-{
-  "pid": 1234,
-  "process": "bash",
-  "syscall": "openat",
-  "timestamp": "2026-05-23T10:00:00.000Z"
-}
+Go to the Project 4 folder:
+
+```bash
+cd kernel_module
 ```
 
-Socket.IO events:
+Read the original module instructions:
 
-- `syscall:new`
-- `logs:init`
-- `stats:update`
-- `monitor:status`
-- `monitor:error`
-- `monitor:pause`
-- `monitor:resume`
-
-## Architecture
-
-The backend detects the OS at startup. Linux uses the `dmesg` reader, while
-Windows and other platforms use the mock generator. Both paths produce the same
-JSON log format, so the frontend does not need platform-specific code.
-
-```mermaid
-flowchart LR
-  KM[Project4 Kernel Module] --> DMESG[dmesg kernel log stream]
-  DMESG --> Parser[Backend log parser]
-  Mock[Windows mock generator] --> Parser
-  Parser --> Store[In-memory log store]
-  Store --> REST[Express REST APIs]
-  Store --> Socket[Socket.IO live events]
-  REST --> UI[React Dashboard]
-  Socket --> UI
+```bash
+cat README.md
 ```
 
-## Live Sequence
+The usual flow is:
 
-```mermaid
-sequenceDiagram
-  participant Kernel as Project4 Kernel Module
-  participant Backend as Node.js Backend
-  participant Socket as Socket.IO
-  participant Frontend as React Dashboard
+1. Copy or place the Linux kernel source on your Linux system.
+2. Apply `barrier.patch` to the kernel source.
+3. Build the patched kernel.
+4. Boot into the patched kernel.
+5. Compile and run `user.c` to test the new system calls.
 
-  Kernel->>Backend: kernel line appears in dmesg
-  Backend->>Backend: parse pid, process, syscall, timestamp
-  Backend->>Socket: emit syscall:new
-  Socket->>Frontend: push new syscall event
-  Frontend->>Frontend: update table, counters, charts, toast
-  Frontend->>Backend: GET /api/stats
-  Backend->>Frontend: latest aggregated statistics
+Example patch command from the kernel source parent directory:
+
+```bash
+patch -p0 < kernel_module/barrier.patch
 ```
 
-## Dashboard Features
+For the original Intel Galileo / Poky SDK target, make sure the SDK path in
+`kernel_module/Makefile` is correct:
 
-- Live syscall log table
-- Search by process name
-- Filter by syscall type
-- Pause and resume monitoring
-- Export filtered logs to CSV
-- Real-time notification popup
-- Activity counters
-- Bar chart, pie chart, and line graph with Recharts
-- Status indicator for Linux Monitoring Active or Windows Demo Mode
-- Theme toggle
-- Responsive layout
+```makefile
+IOT_HOME = /opt/iot-devkit/1.7.2/sysroots
+```
 
-## Sample Screenshots Description
+Then build the user test program:
 
-- Dashboard: dark terminal-inspired header, glowing system status card, animated
-  syscall counters, live charts, and recent kernel log table.
-- Live Monitor: large real-time table with search, syscall filter, pause/resume,
-  and CSV download controls.
-- Statistics: full-width chart view showing top processes, syscall mix, and
-  syscall activity per minute.
-- About Project: concise architecture summary explaining Linux integration and
-  Windows mock mode.
+```bash
+cd kernel_module
+make
+```
 
-## Notes For Beginners
+This creates:
 
-- The frontend reads `VITE_API_URL` from `frontend/.env`.
-- The backend reads `PORT`, `FRONTEND_URL`, `MAX_LOGS`, `MOCK_INTERVAL_MS`, and
-  `FORCE_MOCK` from `backend/.env`.
-- The parser is intentionally tolerant because student kernel module log formats
-  often differ. It looks for common patterns such as `pid=`, `process=`, and
-  `syscall=`.
+```text
+user.o
+```
 
+After booting into the patched kernel, copy `user.o` to the target Linux system
+and run it:
+
+```bash
+./user.o
+```
+
+## Useful Commands
+
+Backend production start:
+
+```bash
+cd backend
+npm start
+```
+
+Frontend production build:
+
+```bash
+cd frontend
+npm run build
+```
+
+Clean the Project 4 build output:
+
+```bash
+cd kernel_module
+make clean
+```
+
+## Notes
+
+- Do not upload `.env` files to GitHub. Use `.env.example` as the template.
+- `node_modules/` and `dist/` are ignored by Git.
+- The dashboard can run without the kernel patch by using demo mode.
+- Real syscall testing requires a Linux kernel that has been patched and booted
+  with the Project 4 changes.
