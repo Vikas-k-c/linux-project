@@ -1,9 +1,9 @@
 # Linux Project - System Call Monitoring Dashboard
 
 This repository contains a Linux system call monitoring dashboard plus the
-original Project 4 kernel module files.
+original kernel module files.
 
-All Project 4 files are inside the `kernel_module/` folder:
+All kernel module files are inside the `kernel_module/` folder:
 
 ```text
 kernel_module/
@@ -20,7 +20,7 @@ kernel module files are kept separate and unchanged inside `kernel_module/`.
 
 ```text
 linux-project/
-|-- kernel_module/   # All Project 4 files
+|-- kernel_module/   # Kernel module files
 |-- backend/         # Express + Socket.IO backend
 |-- frontend/        # Vite + React dashboard
 `-- README.md
@@ -88,9 +88,9 @@ FORCE_MOCK=true npm run dev
 
 Then run the frontend normally from the `frontend/` folder.
 
-## Project 4 Kernel Module Files
+## Kernel Module Files
 
-The original Project 4 instructions are in:
+The original kernel module instructions are in:
 
 ```text
 kernel_module/README.md
@@ -101,11 +101,11 @@ system calls:
 
 - `barrier.patch` applies the syscall changes to the Linux kernel source.
 - `user.c` is the user-space test program.
-- `Makefile` builds the user test program for the original Project 4 target.
+- `Makefile` builds the user test program for the original target.
 
-## Build And Test Project 4 On Linux
+## Build And Test On Linux
 
-Go to the Project 4 folder:
+Go to the kernel module folder:
 
 ```bash
 cd kernel_module
@@ -174,7 +174,7 @@ cd frontend
 npm run build
 ```
 
-Clean the Project 4 build output:
+Clean the kernel module build output:
 
 ```bash
 cd kernel_module
@@ -187,4 +187,4 @@ make clean
 - `node_modules/` and `dist/` are ignored by Git.
 - The dashboard can run without the kernel patch by using demo mode.
 - Real syscall testing requires a Linux kernel that has been patched and booted
-  with the Project 4 changes.
+  with the custom syscall changes.
