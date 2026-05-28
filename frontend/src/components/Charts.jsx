@@ -16,21 +16,24 @@ import {
 
 const colors = ["#22d3ee", "#34d399", "#fbbf24", "#fb7185", "#a78bfa", "#60a5fa", "#f97316"];
 
-const tooltipStyle = {
-  background: "#07111a",
-  border: "1px solid rgba(255,255,255,0.12)",
-  borderRadius: "8px",
-  color: "#e2e8f0"
-};
+function ChartTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) {
+    return null;
+  }
 
-const tooltipLabelStyle = {
-  color: "#cbd5e1",
-  fontWeight: 600
-};
-
-const tooltipItemStyle = {
-  color: "#f8fafc"
-};
+  return (
+    <div className="rounded-lg border border-cyan-300/25 bg-slate-950/95 px-3 py-2 text-sm shadow-xl shadow-black/30">
+      {label ? <p className="mb-1 font-medium text-slate-300">{label}</p> : null}
+      {payload.map((entry) => (
+        <div key={`${entry.name}-${entry.value}`} className="flex items-center gap-2 text-slate-50">
+          <span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: entry.color || entry.fill }} />
+          <span className="font-medium">{entry.name}</span>
+          <span className="text-cyan-200">{entry.value}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export function Charts({ stats }) {
   const topProcesses = stats?.topProcesses || [];
@@ -46,7 +49,7 @@ export function Charts({ stats }) {
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.16)" />
             <XAxis dataKey="process" stroke="#94a3b8" fontSize={12} />
             <YAxis stroke="#94a3b8" fontSize={12} />
-            <Tooltip contentStyle={tooltipStyle} labelStyle={tooltipLabelStyle} itemStyle={tooltipItemStyle} />
+            <Tooltip content={<ChartTooltip />} cursor={{ fill: "rgba(34,211,238,0.08)" }} />
             <Bar dataKey="count" radius={[6, 6, 0, 0]} fill="#22d3ee" />
           </BarChart>
         </ResponsiveContainer>
@@ -61,7 +64,7 @@ export function Charts({ stats }) {
                 <Cell key={entry.syscall} fill={colors[index % colors.length]} />
               ))}
             </Pie>
-            <Tooltip contentStyle={tooltipStyle} labelStyle={tooltipLabelStyle} itemStyle={tooltipItemStyle} />
+            <Tooltip content={<ChartTooltip />} />
             <Legend />
           </PieChart>
         </ResponsiveContainer>
@@ -74,7 +77,7 @@ export function Charts({ stats }) {
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.16)" />
             <XAxis dataKey="minute" stroke="#94a3b8" fontSize={12} />
             <YAxis stroke="#94a3b8" fontSize={12} />
-            <Tooltip contentStyle={tooltipStyle} labelStyle={tooltipLabelStyle} itemStyle={tooltipItemStyle} />
+            <Tooltip content={<ChartTooltip />} />
             <Line type="monotone" dataKey="count" stroke="#34d399" strokeWidth={3} dot={false} />
           </LineChart>
         </ResponsiveContainer>
