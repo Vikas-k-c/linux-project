@@ -23,6 +23,15 @@ const tooltipStyle = {
   color: "#e2e8f0"
 };
 
+const tooltipLabelStyle = {
+  color: "#cbd5e1",
+  fontWeight: 600
+};
+
+const tooltipItemStyle = {
+  color: "#f8fafc"
+};
+
 export function Charts({ stats }) {
   const topProcesses = stats?.topProcesses || [];
   const distribution = stats?.syscallDistribution || [];
@@ -37,7 +46,7 @@ export function Charts({ stats }) {
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.16)" />
             <XAxis dataKey="process" stroke="#94a3b8" fontSize={12} />
             <YAxis stroke="#94a3b8" fontSize={12} />
-            <Tooltip contentStyle={tooltipStyle} />
+            <Tooltip contentStyle={tooltipStyle} labelStyle={tooltipLabelStyle} itemStyle={tooltipItemStyle} />
             <Bar dataKey="count" radius={[6, 6, 0, 0]} fill="#22d3ee" />
           </BarChart>
         </ResponsiveContainer>
@@ -52,7 +61,7 @@ export function Charts({ stats }) {
                 <Cell key={entry.syscall} fill={colors[index % colors.length]} />
               ))}
             </Pie>
-            <Tooltip contentStyle={tooltipStyle} />
+            <Tooltip contentStyle={tooltipStyle} labelStyle={tooltipLabelStyle} itemStyle={tooltipItemStyle} />
             <Legend />
           </PieChart>
         </ResponsiveContainer>
@@ -65,7 +74,7 @@ export function Charts({ stats }) {
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.16)" />
             <XAxis dataKey="minute" stroke="#94a3b8" fontSize={12} />
             <YAxis stroke="#94a3b8" fontSize={12} />
-            <Tooltip contentStyle={tooltipStyle} />
+            <Tooltip contentStyle={tooltipStyle} labelStyle={tooltipLabelStyle} itemStyle={tooltipItemStyle} />
             <Line type="monotone" dataKey="count" stroke="#34d399" strokeWidth={3} dot={false} />
           </LineChart>
         </ResponsiveContainer>
@@ -73,4 +82,3 @@ export function Charts({ stats }) {
     </div>
   );
 }
-
