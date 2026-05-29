@@ -233,7 +233,9 @@ obj-y := barrier_sys.o
 BARRIER_MAKEFILE
 
 if ! grep -q "core-y.*barrier/" Makefile; then
-  sed -i '0,/^core-y[[:space:]]*+=/s|$| barrier/|' Makefile
+  sed -i '0,/^core-y[[:space:]]*+=/{
+    /^core-y[[:space:]]*+=/s|$| barrier/|
+  }' Makefile
 fi
 
 cat >> include/linux/syscalls.h <<'SYSCALL_PROTOTYPES'
